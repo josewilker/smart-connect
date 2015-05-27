@@ -31,7 +31,7 @@ class SmartConnect {
 		bool checkIfStatusIsSuccess();
 		bool checkIfResponseIs200();
 
-		String parseBasedPattern(char * wData, char * pattern, int patternSize, char * closeBracket);
+		bool parseBasedPattern(char * wData, char * pattern, int patternSize, char * closeBracket);
 
 		// vars
 		char wBuffer[1280];
@@ -44,9 +44,10 @@ class SmartConnect {
         char* wPass;
         char* wHostname;
         char* wRecordSet;
-        char* wSessionId;
-        char* wXsessionId;
-        char* wXsessionName;
+
+        String wSessionId;
+        String wXsessionId;
+        String wXsessionName;
 
         int wPort;
         int wConnectionAvaiable;

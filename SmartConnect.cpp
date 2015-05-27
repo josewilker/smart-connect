@@ -42,7 +42,7 @@ void SmartConnect::doFlushData() {
     _client.flush();
 }
 
-String SmartConnect::parseBasedPattern(char wData[], char pattern[], int patternSize, char closeBracket[]) {
+bool SmartConnect::parseBasedPattern(char wData[], char pattern[], int patternSize, char closeBracket[]) {
 
 	int wI=0;
 	int wX=0;
@@ -53,9 +53,8 @@ String SmartConnect::parseBasedPattern(char wData[], char pattern[], int pattern
 
 	int wDataSize;
 	int patternLen = strlen(pattern);
-
+    Serial.println("oie");
     char recordSet[strlen(wData)];
-    char * wRecordSet;
     wRecordSet[0] = '\0';
 
 	Serial.println();
@@ -108,7 +107,7 @@ String SmartConnect::parseBasedPattern(char wData[], char pattern[], int pattern
                         wI=wDataSize;
                         recordSet[rI] = '\0';
                     } else {
-                        recordSet[rI] = (char) wData[wN];
+                        recordSet[rI] = wData[wN];
                     }
 
                     rI++;
@@ -132,7 +131,7 @@ String SmartConnect::parseBasedPattern(char wData[], char pattern[], int pattern
 
     delay(1);
 
-    return recordSet;
+    return true;
 
 }
 
@@ -171,6 +170,9 @@ bool SmartConnect::connect(char hostname[], char login[], char pass[], int port)
     		Serial.println("criando envelope");
     		envelopeRequest("GET", "from", "", "", "", "", AuthID, "");
             result = readEnvelopeConnect();
+            Serial.println("Ultimo passo.");
+            Serial.println(wXsessionId);
+            Serial.println(wXsessionName);
             Serial.println(wSessionId);
             if (wSessionId != "") {
                 wConnectionAvaiable = true;
@@ -526,58 +528,40 @@ bool SmartConnect::checkIfStatusIsSuccess() {
 
 }*/
 
+//String wXsessionId;
+//String wXsessionName;
+
 void SmartConnect::getAndSetSessionId() {
 
     Serial.println(F("Procurando PHPSESSID"));
     delay(10);
-
-    String statusParser;
-
-    //char * wXsessionId;
-    //char * wXsessionName;
+    bool statusParser;
 
     // process sessid
     char wPattern[6] = {'"','i','d','"',':','"'}; // "id":"
     char wCloseBracket[1] = {'"'}; // "
 
     statusParser = parseBasedPattern(wBuffer, wPattern, 6, wCloseBracket);
-    Serial.println(statusParser.length());
+
     if (statusParser) {
 
-        char wXsessionId[statusParser.length()];
-
-        statusParser.toCharArray(wSessionId, statusParser.length());
-        statusParser.toCharArray(wXsessionId, statusParser.length());
-
-        //wSessionId = statusParser;
-        //wXsessionId = statusParser;
+        wXsessionId = wRecordSet;
+        wSessionId=wXsessionId;
+        Serial.print(F("PHPSESSID ID: "));
+        Serial.println(wXsessionId);
 
         // process sessid name
-        statusParser[0] = '\0';
+        statusParser = false;
         char wPattern[8] = {'"','n','a','m', 'e','"',':','"'}; // "name":"
         char wCloseBracket[1] = {'"'}; // "
 
         statusParser = parseBasedPattern(wBuffer, wPattern, 8, wCloseBracket);
-        Serial.println(statusParser.length());
-
-        char wXsessionName[statusParser.length()];
-
         if (statusParser) {
-            statusParser.toCharArray(wXsessionName, statusParser.length());
-            //wXsessionName = statusParser;
+            wXsessionName = String(wRecordSet);
         }
-
-        Serial.print(F("PHPSESSID ID: "));
-
-        int i = 0;
-        for(i=0; i < sizeof(wXsessionId); i++) {
-            Serial.print(wXsessionId[i]);
-        }
-
-        Serial.println();
 
         Serial.print(F("PHPSESSID NAME: "));
-        Serial.println(wXsessionName[0]);
+        Serial.println(wXsessionName);
 
     }
 
@@ -602,6 +586,8 @@ bool SmartConnect::readEnvelopeConnect() {
     readEnvelopeResponse(true, false);
     delay(1);
     getAndSetSessionId();
+
+    //Serial.println(wXsessionId);
 
     if (wSessionId != '\0') {
 
