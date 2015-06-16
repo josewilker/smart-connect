@@ -7,47 +7,48 @@
 
 class SmartConnect {
 
-	public:
+    public:
 
-		void begin(int sp);
-		void encrypt(char login[], char pass[]);
+        void begin(int sp);
 
-		bool connect(char hostname[], char login[], char pass[], int port = 80);
-		bool connectOnHostname();
-		bool getStatusLogged();
+        bool connect(String hostname, char login[], char pass[], int port = 80);
+        bool connected();
 
-		String envelopeRequest(char* rtype,char* rpath,char* app,char* schema,char* path,char* stringData,char* AuthID,char* PHPSESSID);
+        String send(char* rtype, char* app, char* schema, char* path, char* stringData);
 
-	private:
+    private:
 
-		// functions
-		void readEnvelopeResponse(bool d, bool excludeHeaders);
+        // functions
+        void envelopeRequest(char* rtype,char* rpath,char* app,char* schema,char* path,char* stringData,char* AuthID,char* PHPSESSID);
 
-		void getAndSetSessionId();
-		void doHandShake();
-		void doFlushData();
+        void encrypt(char login[], char pass[]);
+        void readEnvelopeResponse(bool d, bool excludeHeaders);
 
-		bool readEnvelopeConnect();
-		bool checkIfStatusIsSuccess();
-		bool checkIfResponseIs200();
+        void getAndSetSessionId();
+        void doHandShake();
+        void doFlushData();
 
-		bool parseBasedPattern(char * wData, char * pattern, int patternSize, char * closeBracket);
+        bool connectOnHostname();
+        bool readEnvelopeConnect();
+        bool checkIfStatusIsSuccess();
+        bool checkIfResponseIs200();
 
-		// vars
-		char wBuffer[1280];
+        char* parseBasedPattern(char * outStr, char * wData, char * pattern, int patternSize, char * closeBracket);
 
-		char AuthID[60];
-		char PHPSESSID[26];
-		char PHPSESSIDN[10];
+        // vars
+        char wBuffer[1280];
 
-		char* wLogin;
+        char AuthID[70];
+        //char PHPSESSID[26];
+        //char PHPSESSIDN[10];
+
+        char* wLogin;
         char* wPass;
-        char* wHostname;
-        char* wRecordSet;
+        char wHostname[21];
+        //char* wRecordSet;
 
-        String wSessionId;
-        String wXsessionId;
-        String wXsessionName;
+        char wSessionId[33];
+        char wSessionName[11];
 
         int wPort;
         int wConnectionAvaiable;
